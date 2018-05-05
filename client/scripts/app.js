@@ -6,16 +6,16 @@
 
 
 var app = {
-  server: 'http://parse.sfm6.hackreactor.com/chatterbox/classes/messages',
+  server: 'http://parse.sfm6.hackreactor.com/chatterbox/classes/messages/',
   init :function(){
     this.fetch();
     },
-
+  messages: [],
   send: function(messageObj) {
     $.ajax({
     // This is the url you should use to communicate with the parse API server.
       url: this.server,
-      type: 'POST',
+      type: 'PUT',
       data: JSON.stringify(messageObj),
       contentType: 'application/json',
       success: function (data) {
@@ -37,10 +37,11 @@ var app = {
       data: JSON.stringify(message),
       contentType: 'application/json',
       success: function (data) {
-        for (var i = data.results.length - 1; i >= data.results.length - 5; i--) {
-            app.renderMessage(data.results[i]);
-          }
-        console.log('chatterbox: Messages recieved');
+        data.results.forEach(function(elem) {
+          app.messages.push(elem)
+          app.renderRoom(elem);
+        })
+        console.log('chatterbox: Messages recieved', data);
       },
       error: function (data) {
         // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -58,7 +59,11 @@ var app = {
   },
 
   renderRoom: function(roomName) {
-    $('#roomSelect').append(`<p>${roomName}</p>`);
+  var rooms = $('#room').children()
+  console.log(rooms);
+    if (roomName.roomname) {
+      $('#room').append(`<option>${roomName.roomname}</option>`);
+    }
   },
 
   handleUsernameClick: function() {
@@ -72,7 +77,7 @@ var app = {
 };
  
 $(document).ready(function() {
-  setInterval(function(){return app.init()}, 5000);
+  //setInterval(function(){return app.init()}, 5000);
   $('#chats').on('click', '.username', function() {
     app.handleUsernameClick();
     }
