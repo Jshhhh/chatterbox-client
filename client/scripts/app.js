@@ -15,7 +15,7 @@ var app = {
     $.ajax({
     // This is the url you should use to communicate with the parse API server.
       url: this.server,
-      type: 'PUT',
+      type: 'POST',
       data: JSON.stringify(messageObj),
       contentType: 'application/json',
       success: function (data) {
@@ -29,12 +29,12 @@ var app = {
     
   },
 
-  fetch: function(message) {
+  fetch: function() {
     $.ajax({
     // This is the url you should use to communicate with the parse API server.
       url: this.server,
       type: 'GET',
-      data: JSON.stringify(message),
+      //data: JSON.stringify(message),
       contentType: 'application/json',
       success: function (data) {
         data.results.forEach(function(elem) {
@@ -59,11 +59,10 @@ var app = {
   },
 
   renderRoom: function(roomName) {
-  var rooms = $('#room').children()
-  console.log(rooms);
-    if (roomName.roomname) {
-      $('#room').append(`<option>${roomName.roomname}</option>`);
-    }
+  // var rooms = $('#room').children()
+    // if (roomName.roomname) {
+      $('#roomSelect').append(`<option>${roomName}</option>`);
+    // }
   },
 
   handleUsernameClick: function() {
@@ -82,7 +81,7 @@ $(document).ready(function() {
     app.handleUsernameClick();
     }
   ),
-  $('#send .submit').on('click', function() {
+  $('#send .submit').on('submit', function() {
     app.handleSubmit();
     }
   );
