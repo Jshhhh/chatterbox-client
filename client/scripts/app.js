@@ -8,7 +8,9 @@
 var app = {
   server: 'http://parse.sfm6.hackreactor.com/chatterbox/classes/messages/',
   init :function(){
+    this.clearMessages();
     this.fetch();
+    
     },
   messages: [],
   send: function(messageObj) {
@@ -34,13 +36,17 @@ var app = {
     // This is the url you should use to communicate with the parse API server.
       url: this.server,
       type: 'GET',
-      //data: JSON.stringify(message),
+      data: 'order=-createdAt',
       contentType: 'application/json',
       success: function (data) {
-        data.results.forEach(function(elem) {
-          app.messages.push(elem)
-          app.renderRoom(elem);
-        })
+        for (var i = data.results.length -1; i >= data.results.length - 100; i--) {
+          app.renderMessage(data.results[i]);
+          app.renderRoom(data.results[i].roomname);
+        }
+        // data.results.forEach(function(elem) {
+        //   app.renderMessage(elem);
+        //   app.renderRoom(elem.roomname);
+        // })
         console.log('chatterbox: Messages recieved', data);
       },
       error: function (data) {
@@ -59,10 +65,15 @@ var app = {
   },
 
   renderRoom: function(roomName) {
-  // var rooms = $('#room').children()
-    // if (roomName.roomname) {
-      $('#roomSelect').append(`<option>${roomName}</option>`);
-    // }
+    
+      // $('select').children.forEach(function(elem){
+      //  return ('select').children.indexOf(elem.roomname === -1)
+      // })
+    //debugger;
+    if ($(`option:contains(${roomName})`).length === 0){
+      // $('#roomSelect').append(`<option>${roomName}</option>`);
+      $('#roomSelect').append(`<option>`+ roomName +`</option>`);
+    }
   },
 
   handleUsernameClick: function() {
@@ -76,12 +87,13 @@ var app = {
 };
  
 $(document).ready(function() {
-  //setInterval(function(){return app.init()}, 5000);
+  app.init();
   $('#chats').on('click', '.username', function() {
     app.handleUsernameClick();
     }
   ),
-  $('#send .submit').on('submit', function() {
+  $('#send .submit').on('click', function() {
+    console.log('submitted');
     app.handleSubmit();
     }
   );
