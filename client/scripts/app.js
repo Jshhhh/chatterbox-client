@@ -12,7 +12,7 @@ var app = {
     this.fetch();
     
     },
-  messages: [],
+ 
   send: function(messageObj) {
     $.ajax({
     // This is the url you should use to communicate with the parse API server.
@@ -28,7 +28,6 @@ var app = {
         console.error('chatterbox: Failed to send message', data);
       }
     });
-    
   },
 
   fetch: function() {
@@ -43,10 +42,6 @@ var app = {
           app.renderMessage(data.results[i]);
           app.renderRoom(data.results[i].roomname);
         }
-        // data.results.forEach(function(elem) {
-        //   app.renderMessage(elem);
-        //   app.renderRoom(elem.roomname);
-        // })
         console.log('chatterbox: Messages recieved', data);
       },
       error: function (data) {
@@ -66,10 +61,6 @@ var app = {
 
   renderRoom: function(roomName) {
     
-      // $('select').children.forEach(function(elem){
-      //  return ('select').children.indexOf(elem.roomname === -1)
-      // })
-    //debugger;
     if ($(`option:contains(${roomName})`).length === 0){
       // $('#roomSelect').append(`<option>${roomName}</option>`);
       $('#roomSelect').append(`<option>`+ roomName +`</option>`);
@@ -80,7 +71,7 @@ var app = {
     console.log(1);
   },
   handleSubmit: function(){
-    var message = {username: $('#newUser').val(), text: $('#newMessage').val()};
+    var message = {username: $('#newUser').val(), text: $('#newMessage').val(), roomname: $('select').val()};
     this.renderMessage(message);
     this.send(message);
   }
@@ -88,10 +79,49 @@ var app = {
  
 $(document).ready(function() {
   app.init();
+
+ $('#newRoom').on('click', function() {
+      console.log('submitted');
+      var message =  $('#newRoomname').val();
+    
+      app.renderRoom(message);
+    }
+  );
+
+
+
+  //setInterval(function(){app.init()}, 8000);
   $('#chats').on('click', '.username', function() {
     app.handleUsernameClick();
     }
-  ),
+  );
+
+  $('select').on('change', function() {
+    app.clearMessages();
+    var room = $('select').val();
+    $.ajax({
+    // This is the url you should use to communicate with the parse API server.
+      url: app.server,
+      type: 'GET',
+      data: 'order=-createdAt',
+      contentType: 'application/json',
+      success: function (data) {
+        for (var i = data.results.length -1; i >= data.results.length - 100; i--) {
+          if (room === data.results[i].roomname) {
+            console.log(data.results[i].roomname)
+            app.renderMessage(data.results[i]);
+          }
+        }
+        console.log('chatterbox: Messages recieved', data);
+      },
+      error: function (data) {
+        // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
+        console.error('chatterbox: Failed to recieve messages', data);
+      }
+    });
+    console.log(room);
+  });
+
   $('#send .submit').on('click', function() {
     console.log('submitted');
     app.handleSubmit();
